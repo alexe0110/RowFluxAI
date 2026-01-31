@@ -1,5 +1,5 @@
 import logging
-from collections.abc import AsyncIterator
+from collections.abc import AsyncGenerator
 
 from llm_pipeline.models import ProcessingResult, Record
 from llm_pipeline.providers.base import LLMProvider
@@ -13,10 +13,10 @@ logger = logging.getLogger(__name__)
 class SequentialStrategy(ProcessingStrategy):
     async def process(
         self,
-        records: AsyncIterator[Record],
+        records: AsyncGenerator[Record],
         provider: LLMProvider,
         prompt: str,
-    ) -> AsyncIterator[ProcessingResult]:
+    ) -> AsyncGenerator[ProcessingResult]:
         """Process records sequentially with retries."""
         async for record in records:
             yield await self._process_single(record, provider, prompt)
@@ -25,13 +25,11 @@ class SequentialStrategy(ProcessingStrategy):
     async def _process_single(record: Record, provider: LLMProvider, prompt: str) -> ProcessingResult:
         """Process a single record with retry and validation."""
         try:
-            transformed, tokens, cost = await with_retry(
-                lambda: provider.transform(prompt, record.content)
-            )
+            transformed, tokens, cost = await with_retry(lambda: provider.transform(prompt, record.content))
 
             is_valid, validation_error = validate_response(transformed)
             if not is_valid:
-                logger.warning(f"Record {record.id}: validation failed - {validation_error}")
+                logger.warning('Record %s: validation failed - %s', record.id, validation_error)
                 return ProcessingResult(
                     record_id=record.id,
                     success=False,
@@ -39,7 +37,7 @@ class SequentialStrategy(ProcessingStrategy):
                     transformed_content=transformed,
                     tokens_used=tokens,
                     cost=cost,
-                    error=f"Validation failed: {validation_error}",
+                    error=f'Validation failed: {validation_error}',
                 )
 
             return ProcessingResult(
@@ -52,7 +50,7 @@ class SequentialStrategy(ProcessingStrategy):
             )
 
         except Exception as e:
-            logger.error(f"Record {record.id}: failed - {e}")
+            logger.error('Record %s: failed - %s', record.id, e)
             return ProcessingResult(
                 record_id=record.id,
                 success=False,

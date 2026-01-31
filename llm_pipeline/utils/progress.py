@@ -13,7 +13,7 @@ from rich.table import Table
 
 
 class ProgressTracker:
-    def __init__(self, total: int, console: Console | None = None):
+    def __init__(self, total: int, console: Console | None = None) -> None:
         """
         Initialize progress tracker.
 
@@ -34,7 +34,7 @@ class ProgressTracker:
         """Start progress tracking."""
         self._progress = Progress(
             SpinnerColumn(),
-            TextColumn("[bold blue]{task.description}"),
+            TextColumn('[bold blue]{task.description}'),
             BarColumn(bar_width=40),
             MofNCompleteColumn(),
             TaskProgressColumn(),
@@ -44,7 +44,7 @@ class ProgressTracker:
             refresh_per_second=2,
         )
         self._progress.start()
-        self._task_id = self._progress.add_task("Processing", total=self.total)
+        self._task_id = self._progress.add_task('Processing', total=self.total)
 
     def update(self, success: bool, tokens: int = 0, cost: float = 0.0) -> None:
         """
@@ -67,7 +67,7 @@ class ProgressTracker:
             self._progress.update(
                 self._task_id,
                 advance=1,
-                description=f"Processing (OK: {self.successful}, ERR: {self.failed})",
+                description=f'Processing (OK: {self.successful}, ERR: {self.failed})',
             )
 
     def stop(self) -> None:
@@ -86,25 +86,25 @@ class ProgressTracker:
         hours, minutes = divmod(minutes, 60)
 
         if hours > 0:
-            duration_str = f"{hours}h {minutes}m {seconds}s"
+            duration_str = f'{hours}h {minutes}m {seconds}s'
         elif minutes > 0:
-            duration_str = f"{minutes}m {seconds}s"
+            duration_str = f'{minutes}m {seconds}s'
         else:
-            duration_str = f"{seconds}s"
+            duration_str = f'{seconds}s'
 
-        table = Table(title="Pipeline Summary", show_header=False, box=None)
-        table.add_column("Metric", style="bold")
-        table.add_column("Value", style="cyan")
+        table = Table(title='Pipeline Summary', show_header=False, box=None)
+        table.add_column('Metric', style='bold')
+        table.add_column('Value', style='cyan')
 
-        table.add_row("Total records", str(self.total))
-        table.add_row("Successful", f"[green]{self.successful}[/green]")
+        table.add_row('Total records', str(self.total))
+        table.add_row('Successful', f'[green]{self.successful}[/green]')
         table.add_row(
-            "Failed",
-            f"[red]{self.failed}[/red]" if self.failed > 0 else str(self.failed),
+            'Failed',
+            f'[red]{self.failed}[/red]' if self.failed > 0 else str(self.failed),
         )
-        table.add_row("Total tokens", f"{self.total_tokens:,}")
-        table.add_row("Estimated cost", f"${self.total_cost:.4f}")
-        table.add_row("Duration", duration_str)
+        table.add_row('Total tokens', f'{self.total_tokens:,}')
+        table.add_row('Estimated cost', f'${self.total_cost:.4f}')
+        table.add_row('Duration', duration_str)
 
         self.console.print()
         self.console.print(table)
@@ -114,6 +114,6 @@ class ProgressTracker:
         self.start()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:  # noqa: ANN001
         """Context manager exit."""
         self.stop()

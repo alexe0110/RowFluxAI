@@ -34,7 +34,7 @@ async def validate_sql_queries(
     if prompt_file:
         prompt_path = Path(prompt_file)
         if prompt_path.exists():
-            validation_prompt = prompt_path.read_text(encoding="utf-8")
+            validation_prompt = prompt_path.read_text(encoding='utf-8')
         else:
             validation_prompt = DEFAULT_VALIDATION_PROMPT
     else:

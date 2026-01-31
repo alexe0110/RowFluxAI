@@ -6,9 +6,9 @@ from llm_pipeline.providers.base import LLMProvider
 
 PRICING = {
     # https://platform.claude.com/docs/en/about-claude/pricing
-    "claude-opus-4-5": {"input": 0.005, "output": 0.025},
-    "claude-sonnet-4-5": {"input": 0.003, "output": 0.015},
-    "claude-haiku-4-5": {"input": 0.001, "output": 0.005},
+    'claude-opus-4-5': {'input': 0.005, 'output': 0.025},
+    'claude-sonnet-4-5': {'input': 0.003, 'output': 0.015},
+    'claude-haiku-4-5': {'input': 0.001, 'output': 0.005},
 }
 
 
@@ -16,10 +16,10 @@ class AnthropicProvider(LLMProvider):
     def __init__(
         self,
         settings: AnthropicSettings,
-        model: str = "claude-sonnet-4-5-20251101",
+        model: str = 'claude-sonnet-4-5-20251101',
         temperature: float = 0.7,
         max_tokens: int = 4096,
-    ):
+    ) -> None:
         """
         Initialize Anthropic provider
 
@@ -36,9 +36,9 @@ class AnthropicProvider(LLMProvider):
 
     def _calculate_cost(self, input_tokens: int, output_tokens: int) -> float:
         """Calculate estimated cost based on token usage."""
-        pricing = PRICING.get(self.model, {"input": 0.003, "output": 0.015})
-        input_cost = (input_tokens / 1000) * pricing["input"]
-        output_cost = (output_tokens / 1000) * pricing["output"]
+        pricing = PRICING.get(self.model, {'input': 0.003, 'output': 0.015})
+        input_cost = (input_tokens / 1000) * pricing['input']
+        output_cost = (output_tokens / 1000) * pricing['output']
         return input_cost + output_cost
 
     async def transform(self, prompt: str, content: str) -> tuple[str, int, float]:
@@ -49,13 +49,13 @@ class AnthropicProvider(LLMProvider):
             temperature=self.temperature,
             system=prompt,
             messages=[
-                MessageParam(role="user", content=content),
+                MessageParam(role='user', content=content),
             ],
         )
 
-        result = ""
+        result = ''
         for block in response.content:
-            if block.type == "text":
+            if block.type == 'text':
                 result += block.text
 
         input_tokens = response.usage.input_tokens
@@ -88,14 +88,14 @@ Answer with "VALID" if the queries work with the same field, or "INVALID: <reaso
             max_tokens=500,
             temperature=0,
             messages=[
-                MessageParam(role="user", content=full_prompt),
+                MessageParam(role='user', content=full_prompt),
             ],
         )
 
-        result = ""
+        result = ''
         for block in response.content:
-            if block.type == "text":
+            if block.type == 'text':
                 result += block.text
 
-        is_valid = result.strip().upper().startswith("VALID")
+        is_valid = result.strip().upper().startswith('VALID')
         return is_valid, result.strip()

@@ -16,23 +16,26 @@ WAIT_MAX = 60
 WAIT_MULTIPLIER = 4
 
 
-class RetryableError(Exception): """Base class for errors that should trigger retry."""
+class RetryableError(Exception):
+    """Base class for errors that should trigger retry."""
 
 
-class RateLimitError(RetryableError): """Rate limit exceeded error."""
+class RateLimitError(RetryableError):
+    """Rate limit exceeded error."""
 
 
-class TimeoutError(RetryableError): """Request timeout error."""
+class RequestTimeoutError(RetryableError):
+    """Request timeout error."""
 
 
-def _before_sleep(retry_state) -> None:
+def _before_sleep(retry_state) -> None:  # noqa: ANN001
     attempt = retry_state.attempt_number
     wait = retry_state.next_action.sleep if retry_state.next_action else 0
     exc = retry_state.outcome.exception() if retry_state.outcome else None
     logger.warning(
-        f"Retry attempt {attempt}/{MAX_ATTEMPTS} after error: {exc}. "
-        f"Waiting {wait:.1f}s before next attempt."
+        f'Retry attempt {attempt}/{MAX_ATTEMPTS}, error: {exc}. Waiting {wait:.1f}s before next attempt.'  # noqa: G004
     )
+
 
 async def with_retry[T](func: Callable[[], Awaitable[T]]) -> T:
     """
@@ -62,10 +65,10 @@ async def with_retry[T](func: Callable[[], Awaitable[T]]) -> T:
             error_name = type(e).__name__.lower()
             error_str = str(e).lower()
 
-            if "rate" in error_name or "rate" in error_str or "429" in error_str:
+            if 'rate' in error_name or 'rate' in error_str or '429' in error_str:
                 raise RateLimitError(str(e)) from e
-            if "timeout" in error_name or "timeout" in error_str:
-                raise TimeoutError(str(e)) from e
+            if 'timeout' in error_name or 'timeout' in error_str:
+                raise RequestTimeoutError(str(e)) from e
 
             raise
 

@@ -3,12 +3,12 @@ from typing import Any
 
 import asyncpg
 
-from llm_pipeline.config import DatabaseSettings
+from llm_pipeline.config import PGSettings
 from llm_pipeline.sinks.base import DataSink
 
 
 class PostgresSink(DataSink):
-    def __init__(self, query: str, settings: DatabaseSettings):
+    def __init__(self, query: str, settings: PGSettings) -> None:
         """
         Initialize PostgreSQL sink.
 
@@ -25,12 +25,12 @@ class PostgresSink(DataSink):
 
     @staticmethod
     def _convert_query(query: str) -> tuple[str, list[str]]:
-        pattern = re.compile(r":(\w+)")
+        pattern = re.compile(r':(\w+)')
         placeholders = pattern.findall(query)
 
         result = query
         for i, name in enumerate(placeholders, 1):
-            result = result.replace(f":{name}", f"${i}", 1)
+            result = result.replace(f':{name}', f'${i}', 1)
 
         return result, placeholders
 
@@ -39,9 +39,9 @@ class PostgresSink(DataSink):
             self._pool = await asyncpg.create_pool(  # type: ignore[misc]
                 host=self._settings.host,
                 port=self._settings.port,
-                database=self._settings.name,
+                database=self._settings.db,
                 user=self._settings.user,
-                password=self._settings.password,
+                password=self._settings.password.get_secret_value(),
                 min_size=1,
                 max_size=5,
             )
@@ -50,12 +50,12 @@ class PostgresSink(DataSink):
     def _build_params(self, record_id: Any, content: str) -> list[Any]:
         params = []
         for name in self._param_order:
-            if name == "content":
+            if name == 'content':
                 params.append(content)
-            elif name == "id":
+            elif name == 'id':
                 params.append(record_id)
             else:
-                raise ValueError(f"Unknown placeholder: {name}")
+                raise ValueError(f'Unknown placeholder: {name}')
         return params
 
     async def write_record(self, record_id: Any, content: str) -> None:
@@ -75,9 +75,8 @@ class PostgresSink(DataSink):
         pool = await self._ensure_pool()
         args = [self._build_params(rid, content) for rid, content in self._pending]
 
-        async with pool.acquire() as conn:
-            async with conn.transaction():
-                await conn.executemany(self._prepared_query, args)
+        async with pool.acquire() as conn, conn.transaction():
+            await conn.executemany(self._prepared_query, args)
 
         self._pending.clear()
 

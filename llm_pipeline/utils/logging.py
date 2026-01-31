@@ -6,9 +6,9 @@ from pathlib import Path
 from rich.console import Console
 from rich.logging import RichHandler
 
-DEFAULT_LOG_FILE = "pipeline.log"
-DEFAULT_LOG_FORMAT = "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
-DEFAULT_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+DEFAULT_LOG_FILE = 'pipeline.log'
+DEFAULT_LOG_FORMAT = '%(asctime)s | %(levelname)-8s | %(name)s | %(message)s'
+DEFAULT_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 
 def setup_logging(
@@ -32,7 +32,7 @@ def setup_logging(
 
     root_logger.handlers.clear()
 
-    file_handler = logging.FileHandler(log_file, encoding="utf-8")
+    file_handler = logging.FileHandler(log_file, encoding='utf-8')
     file_handler.setLevel(level)
     file_formatter = logging.Formatter(DEFAULT_LOG_FORMAT, DEFAULT_DATE_FORMAT)
     file_handler.setFormatter(file_formatter)
@@ -49,9 +49,9 @@ def setup_logging(
         console_handler.setLevel(level)
         root_logger.addHandler(console_handler)
 
-    logging.getLogger("httpx").setLevel(logging.WARNING)
-    logging.getLogger("httpcore").setLevel(logging.WARNING)
-    logging.getLogger("openai").setLevel(logging.WARNING)
-    logging.getLogger("anthropic").setLevel(logging.WARNING)
+    logging.getLogger('httpx').setLevel(logging.WARNING)
+    logging.getLogger('httpcore').setLevel(logging.WARNING)
+    logging.getLogger('openai').setLevel(logging.WARNING)
+    logging.getLogger('anthropic').setLevel(logging.WARNING)
 
     return root_logger

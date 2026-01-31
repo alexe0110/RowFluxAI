@@ -12,14 +12,11 @@ class DataSink(ABC):
             record_id: The primary key of the record.
             content: The transformed content.
         """
-        pass
 
     @abstractmethod
     async def commit_batch(self) -> None:
         """Commit the current batch of records."""
-        pass
 
     @abstractmethod
     async def close(self) -> None:
         """Close the sink connection."""
-        pass

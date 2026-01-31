@@ -5,17 +5,17 @@ from llm_pipeline.config import OpenAISettings
 from llm_pipeline.providers.base import LLMProvider
 
 PRICING = {
-    "gpt-4": {"input": 0.03, "output": 0.06},
-    "gpt-4-turbo": {"input": 0.01, "output": 0.03},
-    "gpt-4-turbo-preview": {"input": 0.01, "output": 0.03},
-    "gpt-4o": {"input": 0.005, "output": 0.015},
-    "gpt-4o-mini": {"input": 0.00015, "output": 0.0006},
-    "gpt-3.5-turbo": {"input": 0.0005, "output": 0.0015},
+    'gpt-4': {'input': 0.03, 'output': 0.06},
+    'gpt-4-turbo': {'input': 0.01, 'output': 0.03},
+    'gpt-4-turbo-preview': {'input': 0.01, 'output': 0.03},
+    'gpt-4o': {'input': 0.005, 'output': 0.015},
+    'gpt-4o-mini': {'input': 0.00015, 'output': 0.0006},
+    'gpt-3.5-turbo': {'input': 0.0005, 'output': 0.0015},
 }
 
 
 class OpenAIProvider(LLMProvider):
-    def __init__(self, settings: OpenAISettings, model: str = "gpt-4o", temperature: float = 0.7):
+    def __init__(self, settings: OpenAISettings, model: str = 'gpt-4o', temperature: float = 0.7) -> None:
         """
         Initialize OpenAI provider.
 
@@ -28,13 +28,12 @@ class OpenAIProvider(LLMProvider):
         self._settings = settings
         self._client = AsyncOpenAI(api_key=self._settings.openai_api_key)
 
-
     def _calculate_cost(self, input_tokens: int, output_tokens: int) -> float:
         """Calculate estimated cost based on token usage."""
 
-        pricing = PRICING.get(self.model, {"input": 0.01, "output": 0.03})
-        input_cost = (input_tokens / 1000) * pricing["input"]
-        output_cost = (output_tokens / 1000) * pricing["output"]
+        pricing = PRICING.get(self.model, {'input': 0.01, 'output': 0.03})
+        input_cost = (input_tokens / 1000) * pricing['input']
+        output_cost = (output_tokens / 1000) * pricing['output']
         return input_cost + output_cost
 
     async def transform(self, prompt: str, content: str) -> tuple[str, int, float]:
@@ -43,12 +42,12 @@ class OpenAIProvider(LLMProvider):
             model=self.model,
             temperature=self.temperature,
             messages=[
-                ChatCompletionSystemMessageParam(role="system", content=prompt),
-                ChatCompletionUserMessageParam(role="user", content=content),
+                ChatCompletionSystemMessageParam(role='system', content=prompt),
+                ChatCompletionUserMessageParam(role='user', content=content),
             ],
         )
 
-        result = response.choices[0].message.content or ""
+        result = response.choices[0].message.content or ''
         usage = response.usage
 
         input_tokens = usage.prompt_tokens if usage else 0
@@ -80,10 +79,10 @@ Answer with "VALID" if the queries work with the same field, or "INVALID: <reaso
             model=self.model,
             temperature=0,
             messages=[
-                ChatCompletionUserMessageParam(role="user", content=full_prompt),
+                ChatCompletionUserMessageParam(role='user', content=full_prompt),
             ],
         )
 
-        result = response.choices[0].message.content or ""
-        is_valid = result.strip().upper().startswith("VALID")
+        result = response.choices[0].message.content or ''
+        is_valid = result.strip().upper().startswith('VALID')
         return is_valid, result.strip()

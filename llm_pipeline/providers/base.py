@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 
 class LLMProvider(ABC):
-    def __init__(self, name: str, model: str, temperature: float = 0.7):
+    def __init__(self, name: str, model: str, temperature: float = 0.7) -> None:
         """
         Initialize provider.
 
@@ -26,7 +26,6 @@ class LLMProvider(ABC):
         Returns:
             Tuple of (transformed_content, tokens_used, estimated_cost).
         """
-        pass
 
     @abstractmethod
     async def validate_sql_match(
@@ -46,4 +45,3 @@ class LLMProvider(ABC):
         Returns:
             Tuple of (is_valid, explanation).
         """
-        pass
