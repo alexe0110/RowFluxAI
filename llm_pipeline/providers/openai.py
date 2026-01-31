@@ -26,7 +26,7 @@ class OpenAIProvider(LLMProvider):
         """
         super().__init__('OpenAI', model, temperature)
         self._settings = settings
-        self._client = AsyncOpenAI(api_key=self._settings.openai_api_key)
+        self._client = AsyncOpenAI(api_key=self._settings.api_key)
 
     def _calculate_cost(self, input_tokens: int, output_tokens: int) -> float:
         """Calculate estimated cost based on token usage."""

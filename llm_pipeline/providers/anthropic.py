@@ -9,6 +9,7 @@ PRICING = {
     'claude-opus-4-5': {'input': 0.005, 'output': 0.025},
     'claude-sonnet-4-5': {'input': 0.003, 'output': 0.015},
     'claude-haiku-4-5': {'input': 0.001, 'output': 0.005},
+    'claude-3-5-haiku-20241022': {'input': 0.0008, 'output': 0.004},
 }
 
 
@@ -16,7 +17,7 @@ class AnthropicProvider(LLMProvider):
     def __init__(
         self,
         settings: AnthropicSettings,
-        model: str = 'claude-sonnet-4-5-20251101',
+        model: str = 'claude-3-5-haiku-20241022',
         temperature: float = 0.7,
         max_tokens: int = 4096,
     ) -> None:
@@ -32,7 +33,7 @@ class AnthropicProvider(LLMProvider):
         super().__init__('Anthropic', model, temperature)
         self.max_tokens = max_tokens
         self._settings = settings
-        self._client = AsyncAnthropic(api_key=self._settings.anthropic_api_key)
+        self._client = AsyncAnthropic(api_key=self._settings.api_key)
 
     def _calculate_cost(self, input_tokens: int, output_tokens: int) -> float:
         """Calculate estimated cost based on token usage."""
