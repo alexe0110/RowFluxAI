@@ -5,6 +5,7 @@ from llm_pipeline.config import AnthropicSettings
 from llm_pipeline.providers.base import LLMProvider
 
 PRICING = {
+    # https://platform.claude.com/docs/en/about-claude/pricing
     "claude-opus-4-5": {"input": 0.005, "output": 0.025},
     "claude-sonnet-4-5": {"input": 0.003, "output": 0.015},
     "claude-haiku-4-5": {"input": 0.001, "output": 0.005},
