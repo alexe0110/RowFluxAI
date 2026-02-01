@@ -2,6 +2,9 @@
 
 Асинхронный пайплайн для row-wise трансформации данных через LLM API.
 
+![process.png](docs/process.png)
+![summary.png](docs/summary.png)
+
 ## 🎯 Что это
 
 Берёт записи из БД → отправляет в LLM с промптом → записывает результат обратно.
@@ -32,6 +35,19 @@ llm_pipeline/
 ```
 
 ## 🚀 Quick Start
+
+```bash
+# Зависимости
+uv sync
+
+# Конфиг — создать .env (см. .env.example)
+DB_HOST=localhost
+DB_NAME=mydb
+ANTHROPIC_API_KEY=sk-ant-...
+
+# Запуск
+uv run python example.py
+```
 
 **Вход:**
 - PostgreSQL с данными
@@ -67,19 +83,4 @@ async def main():
     await pipeline.run()
 
 asyncio.run(main())
-```
-
-## 🛠 Установка
-
-```bash
-# Зависимости
-uv sync
-
-# Конфиг — создать .env (см. .env.example)
-DB_HOST=localhost
-DB_NAME=mydb
-ANTHROPIC_API_KEY=sk-ant-...
-
-# Запуск
-uv run python -m llm_pipeline
 ```

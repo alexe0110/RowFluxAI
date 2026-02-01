@@ -41,7 +41,7 @@ class AnthropicProvider(LLMProvider):
         output_cost = (output_tokens / 1000) * pricing['output']
         return input_cost + output_cost
 
-    async def transform(self, prompt: str, content: str) -> tuple[str, int, float]:
+    async def execute(self, prompt: str, content: str) -> tuple[str, int, float]:
         """Transform content using Anthropic"""
         response = await self._client.messages.create(
             model=self.model,
@@ -64,38 +64,3 @@ class AnthropicProvider(LLMProvider):
         cost = self._calculate_cost(input_tokens, output_tokens)
 
         return result, total_tokens, cost
-
-    async def validate_sql_match(
-        self,
-        select_query: str,
-        update_query: str,
-        validation_prompt: str,
-    ) -> tuple[bool, str]:
-        """Validate SQL queries match using Anthropic"""
-        # todo: тоже поправить
-        full_prompt = f"""{validation_prompt}
-
-SELECT query:
-{select_query}
-
-UPDATE query:
-{update_query}
-
-Answer with "VALID" if the queries work with the same field, or "INVALID: <reason>" if not."""
-
-        response = await self._client.messages.create(
-            model=self.model,
-            max_tokens=500,
-            temperature=0,
-            messages=[
-                MessageParam(role='user', content=full_prompt),
-            ],
-        )
-
-        result = ''
-        for block in response.content:
-            if block.type == 'text':
-                result += block.text
-
-        is_valid = result.strip().upper().startswith('VALID')
-        return is_valid, result.strip()

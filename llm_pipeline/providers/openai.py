@@ -36,7 +36,7 @@ class OpenAIProvider(LLMProvider):
         output_cost = (output_tokens / 1000) * pricing['output']
         return input_cost + output_cost
 
-    async def transform(self, prompt: str, content: str) -> tuple[str, int, float]:
+    async def execute(self, prompt: str, content: str) -> tuple[str, int, float]:
         """Transform content using OpenAI."""
         response = await self._client.chat.completions.create(
             model=self.model,
@@ -56,33 +56,3 @@ class OpenAIProvider(LLMProvider):
         cost = self._calculate_cost(input_tokens, output_tokens)
 
         return result, total_tokens, cost
-
-    async def validate_sql_match(
-        self,
-        select_query: str,
-        update_query: str,
-        validation_prompt: str,
-    ) -> tuple[bool, str]:
-        """Validate SQL queries match using OpenAI."""
-        # todo: пока костыль, нужно норм вынести промпт + мб что то в абстракттый класс
-        full_prompt = f"""{validation_prompt}
-
-SELECT query:
-{select_query}
-
-UPDATE query:
-{update_query}
-
-Answer with "VALID" if the queries work with the same field, or "INVALID: <reason>" if not."""
-
-        response = await self._client.chat.completions.create(
-            model=self.model,
-            temperature=0,
-            messages=[
-                ChatCompletionUserMessageParam(role='user', content=full_prompt),
-            ],
-        )
-
-        result = response.choices[0].message.content or ''
-        is_valid = result.strip().upper().startswith('VALID')
-        return is_valid, result.strip()

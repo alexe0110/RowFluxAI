@@ -15,9 +15,9 @@ class LLMProvider(ABC):
         self.temperature = temperature
 
     @abstractmethod
-    async def transform(self, prompt: str, content: str) -> tuple[str, int, float]:
+    async def execute(self, prompt: str, content: str) -> tuple[str, int, float]:
         """
-        Transform content using the LLM.
+        Execute request using the LLM.
 
         Args:
             prompt: System/instruction prompt.
@@ -25,23 +25,4 @@ class LLMProvider(ABC):
 
         Returns:
             Tuple of (transformed_content, tokens_used, estimated_cost).
-        """
-
-    @abstractmethod
-    async def validate_sql_match(
-        self,
-        select_query: str,
-        update_query: str,
-        validation_prompt: str,
-    ) -> tuple[bool, str]:
-        """
-        Validate that SELECT and UPDATE queries work with the same field.
-
-        Args:
-            select_query: The SELECT query.
-            update_query: The UPDATE query.
-            validation_prompt: Prompt for the LLM to validate.
-
-        Returns:
-            Tuple of (is_valid, explanation).
         """

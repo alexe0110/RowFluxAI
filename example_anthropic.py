@@ -9,15 +9,21 @@ async def main() -> None:
     db_settings = PGSettings()
     anthropic_settings = AnthropicSettings()
 
+    source_query = """
+    select si.id, si.step_content
+from table1 si
+inner join table2 lsi on si.id = lsi.step_id
+where lsi.lesson_id = '3d6123f6-3124-4d7e-b006-7094e2483522' and si.step_type = 'TEST' limit 20"""
+
     source = PostgresSource(
-        query="SELECT id, step_content FROM step_info where step_type = 'THEORY' LIMIT 20",
+        query=source_query,
         settings=db_settings,
         primary_key='id',
         content_field='step_content',
     )
 
     sink = PostgresSink(
-        query='UPDATE step_info SET step_content = :content WHERE id = :id',
+        query='UPDATE table1 SET step_content = :content WHERE id = :id',
         settings=db_settings,
     )
 
@@ -27,13 +33,14 @@ async def main() -> None:
         source=source,
         sink=sink,
         provider=provider,
-        prompt_file='prompts/add_conclusions.txt',
+        prompt_file='prompts/convert_task_to_json.txt',
         validate_sql=True,
         batch_commit_size=10,
     )
 
     results = await pipeline.run()
-
+    if not results:
+        return
     successful = sum(1 for r in results if r.success)
     failed = len(results) - successful
     print(f'\nProcessed: {len(results)}, Success: {successful}, Failed: {failed}')

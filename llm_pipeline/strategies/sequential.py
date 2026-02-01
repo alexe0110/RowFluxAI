@@ -25,7 +25,7 @@ class SequentialStrategy(ProcessingStrategy):
     async def _process_single(record: Record, provider: LLMProvider, prompt: str) -> ProcessingResult:
         """Process a single record with retry and validation."""
         try:
-            transformed, tokens, cost = await with_retry(lambda: provider.transform(prompt, record.content))
+            transformed, tokens, cost = await with_retry(lambda: provider.execute(prompt, record.content))
 
             is_valid, validation_error = validate_response(transformed)
             if not is_valid:

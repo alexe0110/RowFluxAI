@@ -10,7 +10,25 @@ The SELECT query should read data from a field, and the UPDATE query \
 should write transformed data back to the same field.
 
 Analyze the queries and determine if they are compatible - i.e., \
-the field being read in SELECT is the same field being updated in UPDATE."""
+the field being read in SELECT is the same field being updated in UPDATE.
+
+SELECT query:
+{select_query}
+
+UPDATE query:
+{update_query}
+
+IMPORTANT: Start your response with EXACTLY one word: either "VALID" or "INVALID".
+Then on a new line, provide your analysis.
+
+Format:
+VALID
+<your analysis>
+
+OR
+
+INVALID
+<your analysis>"""
 
 
 async def validate_sql_queries(
@@ -40,4 +58,14 @@ async def validate_sql_queries(
     else:
         validation_prompt = DEFAULT_VALIDATION_PROMPT
 
-    return await provider.validate_sql_match(select_query, update_query, validation_prompt)
+    full_prompt = validation_prompt.format(
+        select_query=select_query,
+        update_query=update_query,
+    )
+
+    result, _, _ = await provider.execute(prompt='', content=full_prompt)
+
+    first_line = result.strip().split('\n')[0].strip().upper()
+    is_valid = first_line == 'VALID'
+
+    return is_valid, result.strip()

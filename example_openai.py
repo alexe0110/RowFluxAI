@@ -10,14 +10,14 @@ async def main() -> None:
     openai_settings = OpenAISettings()
 
     source = PostgresSource(
-        query="SELECT id, step_content FROM step_info where step_type = 'THEORY' LIMIT 5",
+        query="SELECT id, step_content FROM table1 where step_type = 'THEORY' LIMIT 5",
         settings=db_settings,
         primary_key='id',
         content_field='step_content',
     )
 
     sink = PostgresSink(
-        query='UPDATE step_info SET step_content = :content WHERE id = :id',
+        query='UPDATE table1 SET step_content = :content WHERE id = :id',
         settings=db_settings,
     )
 

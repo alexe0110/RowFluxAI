@@ -43,7 +43,7 @@ class YandexProvider(LLMProvider):
         output_cost = (output_tokens / 1000) * pricing['output']
         return input_cost + output_cost
 
-    async def transform(self, prompt: str, content: str) -> tuple[str, int, float]:
+    async def execute(self, prompt: str, content: str) -> tuple[str, int, float]:
         """Transform content using YandexGPT."""
         headers = {
             'Authorization': f'Api-Key {self._settings.yandex_api_key}',
@@ -80,51 +80,3 @@ class YandexProvider(LLMProvider):
         cost = self._calculate_cost(input_tokens, output_tokens)
 
         return result, total_tokens, cost
-
-    async def validate_sql_match(
-        self,
-        select_query: str,
-        update_query: str,
-        validation_prompt: str,
-    ) -> tuple[bool, str]:
-        """Validate SQL queries match using YandexGPT."""
-        # todo: тоже надо что то придумать
-        full_prompt = f"""{validation_prompt}
-
-SELECT query:
-{select_query}
-
-UPDATE query:
-{update_query}
-
-Answer with "VALID" if the queries work with the same field, or "INVALID: <reason>" if not."""
-
-        headers = {
-            'Authorization': f'Api-Key {self._settings.yandex_api_key}',
-            'Content-Type': 'application/json',
-        }
-
-        payload = {
-            'modelUri': self._get_model_uri(),
-            'completionOptions': {
-                'stream': False,
-                'temperature': 0,
-                'maxTokens': '500',
-            },
-            'messages': [
-                {'role': 'user', 'text': full_prompt},
-            ],
-        }
-
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            response = await client.post(self.API_URL, headers=headers, json=payload)
-            response.raise_for_status()
-            data = response.json()
-
-        result_data = data.get('result', {})
-        alternatives = result_data.get('alternatives', [])
-
-        result = alternatives[0].get('message', {}).get('text', '') if alternatives else ''
-
-        is_valid = result.strip().upper().startswith('VALID')
-        return is_valid, result.strip()
