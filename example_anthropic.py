@@ -1,7 +1,7 @@
 import asyncio
 
 from llm_pipeline import Pipeline, PostgresSink, PostgresSource
-from llm_pipeline.config import PGSettings, AnthropicSettings
+from llm_pipeline.config import AnthropicSettings, PGSettings
 from llm_pipeline.providers.anthropic import AnthropicProvider
 
 
