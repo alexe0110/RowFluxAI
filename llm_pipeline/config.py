@@ -35,7 +35,6 @@ class AnthropicSettings(BaseSettings):
     api_key: str = ''
 
 
-
 class YandexSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix='YANDEX_', extra='ignore')
 

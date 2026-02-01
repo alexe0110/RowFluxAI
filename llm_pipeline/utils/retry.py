@@ -2,6 +2,7 @@ import logging
 from collections.abc import Awaitable, Callable
 
 from tenacity import (
+    RetryError,
     retry,
     retry_if_exception_type,
     stop_after_attempt,
@@ -56,7 +57,6 @@ async def with_retry[T](func: Callable[[], Awaitable[T]]) -> T:
         stop=stop_after_attempt(MAX_ATTEMPTS),
         wait=wait_exponential(multiplier=WAIT_MULTIPLIER, min=WAIT_MIN, max=WAIT_MAX),
         before_sleep=_before_sleep,
-        reraise=True,
     )
     async def wrapped() -> T:
         try:
@@ -72,4 +72,9 @@ async def with_retry[T](func: Callable[[], Awaitable[T]]) -> T:
 
             raise
 
-    return await wrapped()
+    try:
+        return await wrapped()
+    except RetryError as e:
+        original_exc = e.last_attempt.exception()
+        logger.error('All %s retry attempts failed. Last error: %s', MAX_ATTEMPTS, original_exc)
+        raise original_exc from e

@@ -33,7 +33,8 @@ async def main() -> None:
     )
 
     results = await pipeline.run()
-
+    if not results:
+        return
     successful = sum(1 for r in results if r.success)
     failed = len(results) - successful
     print(f'\nProcessed: {len(results)}, Success: {successful}, Failed: {failed}')

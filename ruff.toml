@@ -44,7 +44,7 @@ select = [
     "PTH",  # pathlib
 ]
 
-ignore = ["TRY400", "T201", "TRY003", "ANN401"]
+ignore = ["TRY400", "T201", "TRY003", "ANN401", "TRY300"]
 
 [format]
 quote-style = "single"

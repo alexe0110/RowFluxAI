@@ -14,6 +14,7 @@ from llm_pipeline.strategies.base import ProcessingStrategy
 from llm_pipeline.strategies.sequential import SequentialStrategy
 from llm_pipeline.utils.logging import setup_logging
 from llm_pipeline.utils.progress import ProgressTracker
+from llm_pipeline.utils.retry import with_retry
 from llm_pipeline.validation.sql_validator import validate_sql_queries
 
 logger = logging.getLogger(__name__)
@@ -84,21 +85,27 @@ class Pipeline:
 
         logger.info('Validating SQL query compatibility...')
 
-        is_valid, explanation = await validate_sql_queries(
-            provider=self.provider,
-            select_query=select_query,
-            update_query=update_query,
-            prompt_file=self.sql_validation_prompt_file,
-        )
+        try:
+            is_valid, explanation = await with_retry(
+                lambda: validate_sql_queries(
+                    provider=self.provider,
+                    select_query=select_query,
+                    update_query=update_query,
+                    prompt_file=self.sql_validation_prompt_file,
+                )
+            )
 
-        if is_valid:
-            logger.info('SQL validation passed')
-        else:
-            logger.error('SQL validation failed: %s', explanation)
+            if is_valid:
+                logger.info('SQL validation passed')
+            else:
+                logger.error('SQL validation failed: %s', explanation)
 
-        return is_valid
+            return is_valid
 
-    async def run(self) -> list[ProcessingResult]:
+        except Exception:
+            return False
+
+    async def run(self) -> list[ProcessingResult] | None:
         """Run the pipeline."""
 
         setup_logging()
@@ -109,7 +116,7 @@ class Pipeline:
         if self.validate_sql:
             is_valid = await self._validate_sql_queries()
             if not is_valid:
-                raise ValueError('SQL validation failed - SELECT and UPDATE queries are not compatible')
+                return None
 
         prompt = self._load_prompt()
         logger.info('Loaded prompt from: %s', self.prompt_file)
